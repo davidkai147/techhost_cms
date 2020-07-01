@@ -11,6 +11,21 @@ import PouchDB from 'pouchdb'
 // import 'animate.css/source/animate.css'
 import VueI18n from 'vue-i18n'
 import Plugins from '@/plugins'
+import VueProgressBar from 'vue-progressbar'
+
+const options = {
+  color: '#bffaf3',
+  failedColor: '#874b4b',
+  thickness: '2px',
+  transition: {
+    speed: '0.2s',
+    opacity: '0.6s',
+    termination: 300
+  },
+  autoRevert: true,
+  location: 'top',
+  inverse: false
+}
 
 Vue.prototype.$axios = axios
 Vue.config.productionTip = false
@@ -18,6 +33,7 @@ Vue.use(Viser)
 Vue.use(Antd)
 Vue.use(VueI18n)
 Vue.use(Plugins)
+Vue.use(VueProgressBar, options)
 
 const i18n = new VueI18n({
   locale: 'CN',
