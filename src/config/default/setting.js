@@ -1,5 +1,5 @@
 module.exports = {
-  lang: 'CN',
+  lang: 'US',
   themeColor: '#1890ff',
   theme: 'dark',
   layout: 'side',
@@ -7,8 +7,8 @@ module.exports = {
   fixedSideBar: true,
   weekMode: false,
   multiPage: false,
-  systemName: 'Vue Antd Admin',
-  copyright: '2018 ICZER 工作室出品',
+  systemName: 'TechHost Admin',
+  copyright: '2020 TechHost',
   animate: {
     name: 'bounce',
     direction: 'left'
