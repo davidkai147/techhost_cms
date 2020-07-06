@@ -1,172 +1,166 @@
 <template>
-  <common-layout>
-    <div class="top">
-      <div class="header">
-        <img alt="logo" class="logo" src="@/assets/img/logo.png" />
-        <span class="title">{{systemName}}</span>
-      </div>
-      <div class="desc">Ant Design 是西湖区最具影响力的 Web 设计规范</div>
-    </div>
-    <div class="login">
-      <a-form @submit="onSubmit" :autoFormCreate="(form) => this.form = form">
-        <a-tabs size="large" :tabBarStyle="{textAlign: 'center'}" style="padding: 0 2px;">
-          <a-tab-pane tab="账户密码登录" key="1">
-            <a-alert type="error" :closable="true" v-show="error" :message="error" showIcon style="margin-bottom: 24px;" />
-            <a-form-item
-              fieldDecoratorId="name"
-              :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入账户名', whitespace: true}]}"
-            >
-              <a-input size="large" placeholder="admin" >
-                <a-icon slot="prefix" type="user" />
-              </a-input>
-            </a-form-item>
-            <a-form-item
-              fieldDecoratorId="password"
-              :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入密码', whitespace: true}]}"
-            >
-              <a-input size="large" placeholder="888888" type="password">
-                <a-icon slot="prefix" type="lock" />
-              </a-input>
-            </a-form-item>
-          </a-tab-pane>
-          <a-tab-pane tab="手机号登录" key="2">
-            <a-form-item>
-              <a-input size="large" placeholder="mobile number" >
-                <a-icon slot="prefix" type="mobile" />
-              </a-input>
-            </a-form-item>
-            <a-form-item>
-              <a-row :gutter="8" style="margin: 0 -4px">
-                <a-col :span="16">
-                  <a-input size="large" placeholder="captcha">
-                    <a-icon slot="prefix" type="mail" />
-                  </a-input>
-                </a-col>
-                <a-col :span="8" style="padding-left: 4px">
-                  <a-button style="width: 100%" class="captcha-button" size="large">获取验证码</a-button>
-                </a-col>
-              </a-row>
-            </a-form-item>
-          </a-tab-pane>
-        </a-tabs>
-        <div>
-          <a-checkbox :checked="true" >自动登录</a-checkbox>
-          <a style="float: right">忘记密码</a>
+    <common-layout>
+        <div class="top">
+            <div class="header">
+                <img alt="logo" class="logo" src="@/assets/img/logo.png"/>
+                <span class="title">{{systemName}}</span>
+            </div>
+            <div class="desc">Dang nhap vao trang quan tri cua TechHost</div>
         </div>
-        <a-form-item>
-          <a-button :loading="logging" style="width: 100%;margin-top: 24px" size="large" htmlType="submit" type="primary">登录</a-button>
-        </a-form-item>
-        <div>
-          其他登录方式
-          <a-icon class="icon" type="alipay-circle" />
-          <a-icon class="icon" type="taobao-circle" />
-          <a-icon class="icon" type="weibo-circle" />
-          <router-link style="float: right" to="/dashboard/workplace" >注册账户</router-link>
+        <div class="login">
+            <ValidationObserver ref="observer" v-slot="{ passes }">
+                <a-form id="components-form-demo-normal-login" class="login-form">
+                    <a-tabs size="large" :tabBarStyle="{textAlign: 'center'}" style="padding: 0 2px;">
+                        <a-tab-pane tab="Dang nhap" key="1">
+                            <InputWithValidation
+                                    v-model="inputData.email"
+                                    rules="required|email"
+                                    v-bind:name="$t('login.email')"
+                                    icon="user"
+                                    :placeholder="$t('login.email_placeholder')"
+                            />
+                            <InputWithValidation
+                                    v-model="inputData.password"
+                                    type="password"
+                                    rules="required"
+                                    v-bind:name="$t('login.password')"
+                                    icon="lock"
+                                    :placeholder="$t('login.password_placeholder')"
+                                    vid="password"
+                            />
+                            <div>
+                                <a-checkbox :checked="true">Remember me</a-checkbox>
+                                <a style="float: right">Quen mat khau</a>
+                            </div>
+                            <a-form-item>
+                                <a-button :loading="logging" style="width: 100%;margin-top: 24px" size="large" htmlType="submit"
+                                          type="primary" @click="passes(submit)">{{ $t('login.login_button') }}
+                                </a-button>
+                            </a-form-item>
+                        </a-tab-pane>
+                        <a-tab-pane tab="Quen mat khau" key="2">
+                        </a-tab-pane>
+                    </a-tabs>
+                </a-form>
+            </ValidationObserver>
         </div>
-      </a-form>
-    </div>
-  </common-layout>
+    </common-layout>
 </template>
 
 <script>
-import CommonLayout from '@/layouts/CommonLayout'
+    import CommonLayout from '@/layouts/CommonLayout'
+    import {mapActions} from 'vuex'
+    import InputWithValidation from '../../components/shared/InputWithValidation'
+    import store from '../../store'
 
-export default {
-  name: 'Login',
-  components: {CommonLayout},
-  data () {
-    return {
-      logging: false,
-      error: ''
-    }
-  },
-  computed: {
-    systemName () {
-      return this.$store.state.setting.systemName
-    }
-  },
-  methods: {
-    onSubmit (e) {
-      e.preventDefault()
-      this.form.validateFields((err) => {
-        if (!err) {
-          this.logging = true
-          this.$axios.post('/login', {
-            name: this.form.getFieldValue('name'),
-            password: this.form.getFieldValue('password')
-          }).then((res) => {
-            this.logging = false
-            const result = res.data
-            if (result.code >= 0) {
-              const user = result.data.user
-              this.$router.push('/dashboard/workplace')
-              this.$store.commit('account/setUser', user)
-              this.$message.success(result.message, 3)
-            } else {
-              this.error = result.message
+    export default {
+        name: 'Login',
+        components: {
+            CommonLayout,
+            InputWithValidation,
+        },
+        beforeCreate() {
+            this.form = this.$form.createForm(this, {name: 'normal_login'});
+        },
+        data() {
+            return {
+                inputData: {
+                    email: null,
+                    password: null,
+                },
+                logging: false,
             }
-          })
+        },
+        computed: {
+            systemName() {
+                return this.$store.state.setting.systemName
+            }
+        },
+        methods: {
+            ...mapActions('auth', ['login', 'checkAuth']),
+
+            async submit() {
+                let data = {...this.inputData}
+                console.log(data)
+                this.logging = true
+
+                try {
+                    await this.login(data).then((res) => {
+                        this.logging = false
+                        store.dispatch('auth/checkAuth')
+                        const name = res.typeAuth === 'SUPER_ADMIN' ? 'AdminDashboard' : 'AccountDashboard'
+                        this.$router.push({name: name})
+                    })
+                } catch (e) {
+                    this.logging = false
+                    this.$message.error(e.response.data.error.message)
+                }
+            }
         }
-      })
     }
-  }
-}
 </script>
 
 <style lang="less" scoped>
-  .common-layout{
-    .top {
-      text-align: center;
-      .header {
-        height: 44px;
-        line-height: 44px;
-        a {
-          text-decoration: none;
-        }
-        .logo {
-          height: 44px;
-          vertical-align: top;
-          margin-right: 16px;
-        }
-        .title {
-          font-size: 33px;
-          color: rgba(0,0,0,.85);
-          font-family: 'Myriad Pro', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-          font-weight: 600;
-          position: relative;
-          top: 2px;
-        }
-      }
-      .desc {
-        font-size: 14px;
-        color: rgba(0,0,0,.45);
-        margin-top: 12px;
-        margin-bottom: 40px;
-      }
-    }
-    .login{
-      width: 368px;
-      margin: 0 auto;
-      @media screen and (max-width: 576px) {
-        width: 95%;
-      }
-      @media screen and (max-width: 320px) {
-        .captcha-button{
-          font-size: 14px;
-        }
-      }
-      .icon {
-        font-size: 24px;
-        color: rgba(0, 0, 0, 0.2);
-        margin-left: 16px;
-        vertical-align: middle;
-        cursor: pointer;
-        transition: color 0.3s;
+    .common-layout {
+        .top {
+            text-align: center;
 
-        &:hover {
-          color: @primary-color;
+            .header {
+                height: 44px;
+                line-height: 44px;
+
+                a {
+                    text-decoration: none;
+                }
+
+                .logo {
+                    height: 44px;
+                    vertical-align: top;
+                    margin-right: 16px;
+                }
+
+                .title {
+                    font-size: 33px;
+                    color: rgba(0, 0, 0, .85);
+                    font-family: 'Myriad Pro', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                    font-weight: 600;
+                    position: relative;
+                    top: 2px;
+                }
+            }
+
+            .desc {
+                font-size: 14px;
+                color: rgba(0, 0, 0, .45);
+                margin-top: 12px;
+                margin-bottom: 40px;
+            }
         }
-      }
+
+        .login {
+            width: 368px;
+            margin: 0 auto;
+            @media screen and (max-width: 576px) {
+                width: 95%;
+            }
+            @media screen and (max-width: 320px) {
+                .captcha-button {
+                    font-size: 14px;
+                }
+            }
+
+            .icon {
+                font-size: 24px;
+                color: rgba(0, 0, 0, 0.2);
+                margin-left: 16px;
+                vertical-align: middle;
+                cursor: pointer;
+                transition: color 0.3s;
+
+                &:hover {
+                    color: @primary-color;
+                }
+            }
+        }
     }
-  }
 </style>
